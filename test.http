@@ -1,0 +1,7 @@
+POST http://127.0.0.1:5000/api/login-siswa-aman
+Content-Type: application/json
+
+{
+  "nisn": "' OR '1'='1",
+  "kata_sandi": "' OR '1'='1"
+}

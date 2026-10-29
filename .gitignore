@@ -1,0 +1,19 @@
+# 1. Folder Virtual Environment Python (Wajib diabaikan)
+venv/
+env/
+ENV/
+.venv/
+
+# 2. File Cache Python (Otomatis dibuat saat aplikasi berjalan)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 3. File Konfigurasi / Sensitif Tambahan
+.env
+*.log
+
+# 4. Folder Editor / IDE
+.vscode/
+.idea/

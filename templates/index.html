@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Akademik - SMKN 1 Bengkalis</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- LINK CSS EKSTERNAL FLASK -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="app-wrapper">
+    <!-- Sidebar Left -->
+    <aside class="sidebar" id="sidebar">
+        <div>
+            <div class="brand-header">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold">SMKN 1 Bengkalis</h6>
+                    <small class="text-muted" style="font-size: 0.75rem;">Virtual AI Helpdesk</small>
+                </div>
+            </div>
+
+            <!-- User Auth Status -->
+            <div class="mt-3">
+                {% if siswa %}
+                <div class="user-card text-center">
+                    <i class="fa-solid fa-user-check text-success fs-3 mb-2"></i>
+                    <h6 class="mb-0 fw-bold text-truncate" id="user-display-name">{{ siswa.nama_siswa }}</h6>
+                    <small class="text-muted d-block mb-2">NISN: {{ siswa.nisn }}</small>
+                    <button onclick="handleLogout()" class="btn btn-sm btn-outline-danger w-100 rounded-pill">
+                        <i class="fa-solid fa-right-from-bracket me-1"></i> Keluar
+                    </button>
+                </div>
+                {% else %}
+                <div class="user-card text-center">
+                    <i class="fa-solid fa-user-lock text-secondary fs-3 mb-2"></i>
+                    <h6 class="mb-1 fw-bold">Akses Siswa</h6>
+                    <p class="text-muted mb-2" style="font-size: 0.78rem;">Masuk untuk mengakses nilai rapor pribadi.</p>
+                    <button data-bs-toggle="modal" data-bs-target="#loginModal" class="btn btn-sm btn-primary w-100 rounded-pill">
+                        <i class="fa-solid fa-right-to-bracket me-1"></i> Masuk Siswa
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Quick Questions -->
+            <div class="quick-prompts">
+                <small class="text-muted fw-bold text-uppercase d-block mb-2" style="font-size: 0.7rem; letter-spacing: 0.5px;">Pertanyaan Populer</small>
+                <button class="quick-btn" onclick="sendQuickPrompt('Syarat PPDB')">
+                    <i class="fa-solid fa-file-signature text-primary"></i> Syarat PPDB
+                </button>
+                <button class="quick-btn" onclick="sendQuickPrompt('Daftar Jurusan')">
+                    <i class="fa-solid fa-list-check text-success"></i> Daftar Jurusan
+                </button>
+                <button class="quick-btn" onclick="sendQuickPrompt('Berita sekolah terbaru')">
+                    <i class="fa-solid fa-newspaper text-info"></i> Berita Sekolah
+                </button>
+                <button class="quick-btn" onclick="sendQuickPrompt('Cek Nilai Rapor')">
+                    <i class="fa-solid fa-chart-line text-warning"></i> Cek Nilai Rapor
+                </button>
+            </div>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+            <small class="text-muted" style="font-size: 0.75rem;">Tema Tampilan</small>
+            <button class="btn btn-sm btn-light border rounded-circle" id="theme-toggle" onclick="toggleTheme()" title="Ubah Tema">
+                <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Chat Content -->
+    <main class="main-chat">
+        <!-- Top Chat Header -->
+        <header class="chat-header">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-sm btn-light border" onclick="toggleSidebar()" id="sidebar-toggle">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
+                    <i class="fa-solid fa-circle me-1" style="font-size: 0.5rem;"></i> Sistem Aktif
+                </span>
+            </div>
+            <div class="text-end">
+                <small class="text-muted fw-semibold d-none d-sm-block">Asisten Layanan Akademik & Informasi</small>
+            </div>
+        </header>
+
+        <!-- Chat Container Messages (Sapaan Awal Proaktif) -->
+        <div class="chat-container" id="chat-container">
+            <div class="message-bubble bot-message shadow-sm">
+                {% if siswa %}
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fa-solid fa-hand-wave text-warning fs-5"></i>
+                        <h6 class="mb-0 fw-bold text-primary">Halo, {{ siswa.nama_siswa }}!</h6>
+                    </div>
+                    <p class="mb-2">Selamat datang kembali di <strong>Virtual Helpdesk SMKN 1 Bengkalis</strong>. Ada yang bisa saya bantu terkait informasi akademik atau nilai Anda hari ini?</p>
+                    
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="sendQuickPrompt('Cek Nilai Rapor')">
+                            <i class="fa-solid fa-chart-line me-1"></i> Cek Nilai Rapor
+                        </button>
+                        <button class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="sendQuickPrompt('Berita sekolah terbaru')">
+                            <i class="fa-solid fa-newspaper me-1"></i> Berita Sekolah
+                        </button>
+                        <button class="btn btn-sm btn-outline-info rounded-pill px-3" onclick="sendQuickPrompt('Jam Layanan Tata Usaha (TU)')">
+                            <i class="fa-solid fa-clock me-1"></i> Jam Layanan TU
+                        </button>
+                    </div>
+                {% else %}
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fa-solid fa-robot text-primary fs-5"></i>
+                        <h6 class="mb-0 fw-bold text-primary">Selamat Datang di SMKN 1 Bengkalis! 👋</h6>
+                    </div>
+                    <p class="mb-2">Saya adalah <strong>Asisten Virtual AI Sekolah</strong>. Saya siap membantu Anda menemukan berbagai informasi seputar SMKN 1 Bengkalis dengan cepat.</p>
+                    <p class="small text-muted mb-2">Pilih salah satu topik populer di bawah ini atau ketik pertanyaan Anda secara langsung:</p>
+
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="sendQuickPrompt('Syarat PPDB')">
+                            <i class="fa-solid fa-file-signature me-1"></i> Syarat PPDB
+                        </button>
+                        <button class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="sendQuickPrompt('Daftar Jurusan')">
+                            <i class="fa-solid fa-graduation-cap me-1"></i> Daftar Jurusan
+                        </button>
+                        <button class="btn btn-sm btn-outline-info rounded-pill px-3" onclick="sendQuickPrompt('Berita sekolah terbaru')">
+                            <i class="fa-solid fa-newspaper me-1"></i> Berita Sekolah
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning text-dark rounded-pill px-3" onclick="sendQuickPrompt('Cek Nilai Rapor')">
+                            <i class="fa-solid fa-chart-line me-1"></i> Cek Nilai Rapor
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Input Chat Box Area -->
+        <div class="input-area">
+            <div class="input-box-container">
+                <form id="chat-form" onsubmit="handleSendMessage(event)">
+                    <div class="input-group">
+                        <input type="text" id="user-input" class="form-control form-control-custom" placeholder="Ketik pertanyaan Anda di sini..." autocomplete="off" required>
+                        <button type="submit" class="btn btn-primary px-4 rounded-end-3" id="send-btn">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal Login Siswa -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="loginModalLabel">Masuk Akun Siswa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="login-form" onsubmit="handleLoginSiswa(event)">
+                    <div class="mb-3">
+                        <label for="login-nisn" class="form-label small fw-semibold">NISN Siswa</label>
+                        <input type="text" class="form-control rounded-3" id="login-nisn" placeholder="Masukkan NISN Anda" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="login-password" class="form-label small fw-semibold">Kata Sandi</label>
+                        <input type="password" class="form-control rounded-3" id="login-password" placeholder="Masukkan Kata Sandi" required>
+                    </div>
+                    <div id="login-error" class="alert alert-danger d-none py-2 small"></div>
+                    <button type="submit" class="btn btn-primary w-100 rounded-3 py-2 fw-semibold">Masuk</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- LINK JS EKSTERNAL FLASK -->
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>

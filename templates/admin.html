@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - Chatbot Akademik SMKN 1 Bengkalis</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS Eksternal Admin -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation Admin -->
+        <aside class="col-md-3 col-lg-2 admin-sidebar p-3 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-4 px-2 pt-2">
+                    <i class="fa-solid fa-user-shield text-primary fs-4"></i>
+                    <h5 class="fw-bold text-white mb-0">Admin Panel</h5>
+                </div>
+                <div class="nav flex-column nav-pills gap-1">
+                    <a class="nav-link active d-flex align-items-center gap-2" href="#sec-faq">
+                        <i class="fa-solid fa-database"></i> Kelola FAQ
+                    </a>
+                    <a class="nav-link d-flex align-items-center gap-2" href="#sec-users">
+                        <i class="fa-solid fa-users-gear"></i> Kelola Pengguna
+                    </a>
+                    <a class="nav-link d-flex align-items-center gap-2" href="#sec-unanswered">
+                        <i class="fa-solid fa-circle-question"></i> Unanswered Query
+                    </a>
+                </div>
+            </div>
+            
+            <div class="pt-3 border-top border-secondary">
+                <a href="/" class="btn btn-outline-light w-100 btn-sm rounded-pill d-flex align-items-center justify-content-center gap-2">
+                    <i class="fa-solid fa-house"></i> Ke Chatbot Utama
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="col-md-9 col-lg-10 p-4">
+            <header class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">Manajemen Pangkalan Data Chatbot</h4>
+                    <small class="text-muted">Kelola FAQ, pengguna (siswa/guru), dan tangani pertanyaan yang belum terjawab</small>
+                </div>
+                <button class="btn btn-primary rounded-pill px-3 py-2 fw-semibold shadow-sm" onclick="openModalTambahFAQ()">
+                    <i class="fa-solid fa-plus me-1"></i> Tambah FAQ Baru
+                </button>
+            </header>
+
+            <!-- Section 1: Tabel FAQ Utama (tb_faq) -->
+            <section id="sec-faq" class="card border-0 shadow-sm mb-4 rounded-3 overflow-hidden">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-primary d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-list"></i> Daftar Pertanyaan & Jawaban (tb_faq)
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 custom-admin-table">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th class="ps-3 col-id">ID</th>
+                                    <th class="col-pertanyaan">Pertanyaan</th>
+                                    <th class="col-jawaban">Jawaban</th>
+                                    <th class="text-center col-akses">Akses Khusus</th>
+                                    <th class="text-center col-aksi">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="faq-tbody" class="small">
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">Memuat data FAQ...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Kelola Pengguna (Siswa & Guru) -->
+            <section id="sec-users" class="card border-0 shadow-sm mb-4 rounded-3 overflow-hidden">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                        <h6 class="mb-0 fw-bold text-success d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-users"></i> Kelola Data Pengguna
+                        </h6>
+                        <!-- Nav Tab Switcher -->
+                        <ul class="nav nav-pills nav-fill gap-2 small" id="userTabs" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active py-1 px-3" id="tab-siswa-btn" onclick="switchUserTab('siswa')">Data Siswa</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link py-1 px-3" id="tab-guru-btn" onclick="switchUserTab('guru')">Data Guru</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="user-add-btn-container">
+                        <button class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="openModalTambahSiswa()">
+                            <i class="fa-solid fa-user-plus me-1"></i> Tambah Siswa Baru
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    <!-- Tabel Siswa -->
+                    <div id="view-siswa" class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 custom-admin-table">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th class="ps-3">NISN</th>
+                                    <th>Nama Siswa</th>
+                                    <th>Kelas</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="siswa-tbody" class="small">
+                                <tr><td colspan="4" class="text-center py-4 text-muted">Memuat data siswa...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tabel Guru -->
+                    <div id="view-guru" class="table-responsive d-none">
+                        <table class="table table-hover align-middle mb-0 custom-admin-table">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th class="ps-3">NIP / ID Guru</th>
+                                    <th>Nama Guru</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="guru-tbody" class="small">
+                                <tr><td colspan="3" class="text-center py-4 text-muted">Memuat data guru...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Tabel Unanswered Queries -->
+<section id="sec-unanswered" class="card border-0 shadow-sm rounded-3 overflow-hidden">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h6 class="mb-0 fw-bold text-warning d-flex align-items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation"></i> Pertanyaan Tidak Terjawab (tb_unanswered_queries)
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small">
+                    <tr>
+                        <th class="ps-3">Pertanyaan Masuk</th>
+                        <th class="text-center">Skor Similarity</th>
+                        <th class="text-center">Waktu Dibuat</th>
+                        <th class="text-center" style="width: 140px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="unanswered-tbody" class="small">
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">Memuat data riwayat...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Modal Jawab Pertanyaan Unanswered -->
+<div class="modal fade" id="modalJawabUnanswered" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Jawab Pertanyaan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="form-jawab-unanswered" onsubmit="handleSaveAnsweredQuery(event)">
+                    <input type="hidden" id="unanswered-id">
+                    
+                    <div class="mb-3">
+                        <label for="unanswered-pertanyaan" class="form-label small fw-semibold">Pertanyaan Siswa/Tamu</label>
+                        <input type="text" class="form-control rounded-3 bg-light" id="unanswered-pertanyaan" required readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="unanswered-jawaban" class="form-label small fw-semibold">Jawaban Chatbot</label>
+                        <textarea class="form-control rounded-3" id="unanswered-jawaban" rows="5" placeholder="Ketik jawaban resmi untuk disimpan ke FAQ..." required></textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="unanswered-protected">
+                        <label class="form-check-label small" for="unanswered-protected">
+                            Butuh Login Siswa (Akses Khusus Siswa)
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 rounded-3 py-2 fw-semibold">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Simpan ke FAQ & Selesaikan
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah / Edit FAQ -->
+<div class="modal fade" id="modalFAQ" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalFAQTitle">Tambah FAQ Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="form-faq" onsubmit="handleSaveFAQ(event)">
+                    <input type="hidden" id="faq-id">
+                    <div class="mb-3">
+                        <label for="faq-pertanyaan" class="form-label small fw-semibold">Pertanyaan</label>
+                        <input type="text" class="form-control rounded-3" id="faq-pertanyaan" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="faq-jawaban" class="form-label small fw-semibold">Jawaban</label>
+                        <textarea class="form-control rounded-3" id="faq-jawaban" rows="5" required></textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="faq-protected">
+                        <label class="form-check-label small" for="faq-protected">
+                            Butuh Login Siswa (Pertanyaan Nilai/Pribadi)
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 rounded-3 py-2 fw-semibold">Simpan Data FAQ</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Siswa -->
+<div class="modal fade" id="modalSiswa" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Tambah Siswa Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="form-siswa" onsubmit="handleSaveSiswa(event)">
+                    <div class="mb-3">
+                        <label for="siswa-nisn" class="form-label small fw-semibold">NISN</label>
+                        <input type="text" class="form-control rounded-3" id="siswa-nisn" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="siswa-nama" class="form-label small fw-semibold">Nama Lengkap</label>
+                        <input type="text" class="form-control rounded-3" id="siswa-nama" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="siswa-kelas" class="form-label small fw-semibold">Kelas</label>
+                        <input type="text" class="form-control rounded-3" id="siswa-kelas" placeholder="Contoh: XII RPL 1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="siswa-pass" class="form-label small fw-semibold">Kata Sandi</label>
+                        <input type="password" class="form-control rounded-3" id="siswa-pass" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 rounded-3 py-2 fw-semibold">Simpan Data Siswa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- JS Eksternal Admin -->
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

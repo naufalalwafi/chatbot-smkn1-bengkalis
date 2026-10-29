@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Guru - SMKN 1 Bengkalis</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS Eksternal Guru -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/guru.css') }}">
+</head>
+<body class="bg-light">
+
+<!-- Navbar Dashboard Guru -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
+            <i class="fa-solid fa-graduation-cap fs-4"></i>
+            <span>Portal Guru SMKN 1 Bengkalis</span>
+        </a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-white small d-none d-md-inline">
+                <i class="fa-solid fa-user-tie me-1"></i> Prof. Naufal, M.T.
+            </span>
+            <button onclick="handleLogoutGuru()" class="btn btn-sm btn-light text-primary rounded-pill px-3 fw-semibold shadow-sm">
+                <i class="fa-solid fa-right-from-bracket me-1"></i> Keluar
+            </button>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-4 mb-5">
+    <div class="row g-4">
+        <!-- Kolom Kiri: Form Input / Update Nilai Siswa -->
+        <div class="col-lg-5 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3">
+                <div class="card-body">
+                    <h5 class="fw-bold text-primary mb-3 d-flex align-items-center gap-2" id="form-title">
+                        <i class="fa-solid fa-pen-to-square"></i> Input / Perbarui Nilai Siswa
+                    </h5>
+                    <form id="form-input-nilai" onsubmit="handleSaveNilaiGuru(event)">
+                        <!-- Field Hidden untuk simpan ID nilai jika sedang EDIT -->
+                        <input type="hidden" id="guru-nilai-id" value="">
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">NISN Siswa</label>
+                            <input type="text" class="form-control rounded-3" id="guru-nisn" placeholder="Contoh: 12345678" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Nama Siswa (Opsional)</label>
+                            <input type="text" class="form-control rounded-3" id="guru-nama-siswa" placeholder="Contoh: Muhammad Naufal">
+                        </div>
+
+                        <!-- Dropdown Program Keahlian Automatis -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Program Keahlian</label>
+                            <select class="form-select rounded-3" id="guru-program-keahlian" required>
+                                <option value="" selected disabled>-- Pilih Program Keahlian --</option>
+                                <option value="Agribisnis Perikanan">Agribisnis Perikanan</option>
+                                <option value="Desain Komunikasi Visual">Desain Komunikasi Visual</option>
+                                <option value="Desain Pemodelan dan Informasi Bangunan">Desain Pemodelan dan Informasi Bangunan</option>
+                                <option value="Teknik Jaringan Komputer dan Telekomunikasi">Teknik Jaringan Komputer dan Telekomunikasi</option>
+                                <option value="Teknik Pengelasan dan Fabrikasi Logam">Teknik Pengelasan dan Fabrikasi Logam</option>
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-semibold">Tingkat Kelas</label>
+                                <select class="form-select rounded-3" id="guru-tingkat-kelas" required>
+                                    <option value="X">Kelas X</option>
+                                    <option value="XI">Kelas XI</option>
+                                    <option value="XII" selected>Kelas XII</option>
+                                </select>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-semibold">Nomor Kelas / Rombel</label>
+                                <input type="text" class="form-control rounded-3" id="guru-rombel" placeholder="Contoh: 1 / A" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-semibold">Semester</label>
+                                <select class="form-select rounded-3" id="guru-semester" required>
+                                    <option value="Ganjil">Ganjil</option>
+                                    <option value="Genap">Genap</option>
+                                </select>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-semibold">Tahun Ajaran</label>
+                                <input type="text" class="form-control rounded-3" id="guru-ta" placeholder="2023/2024" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Mata Pelajaran</label>
+                            <input type="text" class="form-control rounded-3" id="guru-mapel" placeholder="Contoh: Pemrograman Web" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Guru Pengampu</label>
+                            <input type="text" class="form-control rounded-3" id="guru-pengampu" placeholder="Prof. Naufal, M.T." required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Nilai Akhir (0-100)</label>
+                            <input type="number" min="0" max="100" class="form-control rounded-3" id="guru-nilai" placeholder="Contoh: 88" required>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary w-100 rounded-3 py-2 fw-semibold shadow-sm" id="btn-submit-nilai">
+                                <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Nilai
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary d-none" id="btn-cancel-edit" onclick="resetFormInput()">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kolom Kanan: Rekap Nilai Siswa -->
+        <div class="col-lg-7 col-xl-8">
+            <div class="card border-0 shadow-sm rounded-4 p-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-list-check"></i> Rekap Nilai Siswa
+                        </h5>
+                        <button onclick="openModalTambahFAQGuru()" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold shadow-sm">
+                            <i class="fa-solid fa-plus me-1"></i> Tambah FAQ Siswa
+                        </button>
+                    </div>
+
+                    <div id="rekap-siswa-container" class="accordion accordion-flush mt-3">
+                        <div class="text-center py-5 text-muted">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="small mt-2">Memuat rekap data nilai...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah FAQ dari Guru -->
+<div class="modal fade" id="modalFAQGuru" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Tambah FAQ Akademik</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="form-faq-guru" onsubmit="handleSaveFAQGuru(event)">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Pertanyaan</label>
+                        <input type="text" class="form-control rounded-3" id="guru-faq-pertanyaan" placeholder="Contoh: Kapan jadwal ujian remedial?" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Jawaban Chatbot</label>
+                        <textarea class="form-control rounded-3" id="guru-faq-jawaban" rows="4" placeholder="Tuliskan jawaban lengkap..." required></textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="guru-faq-protected">
+                        <label class="form-check-label small" for="guru-faq-protected">
+                            Butuh Login Siswa (Akses Khusus Siswa)
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 rounded-3 py-2 fw-semibold">Simpan FAQ Baru</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- JS Eksternal Dashboard Guru -->
+<script src="{{ url_for('static', filename='js/guru_dashboard.js') }}"></script>
+</body>
+</html>
